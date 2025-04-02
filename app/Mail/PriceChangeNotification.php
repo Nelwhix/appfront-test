@@ -9,20 +9,13 @@ use App\Models\Product;
 
 class PriceChangeNotification extends Mailable
 {
-    public $product;
-    public $oldPrice;
-    public $newPrice;
-
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($product, $oldPrice, $newPrice)
+    public function __construct(public Product $product, public float $oldPrice, public float $newPrice)
     {
-        $this->product = $product;
-        $this->oldPrice = $oldPrice;
-        $this->newPrice = $newPrice;
     }
 
     /**

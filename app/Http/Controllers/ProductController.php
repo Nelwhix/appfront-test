@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Exception;
 use App\Models\Product;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::all();
+        $products = Product::query()->paginate(20);
         $exchangeRate = $this->getExchangeRate();
 
         return view('products.list', compact('products', 'exchangeRate'));
     }
 
-    public function show(Request $request)
+    public function show(string $product_id)
     {
-        $id = $request->route('product_id');
-        $product = Product::find($id);
+        $product = Product::findOrFail($product_id);
         $exchangeRate = $this->getExchangeRate();
 
         return view('products.show', compact('product', 'exchangeRate'));
@@ -29,32 +31,18 @@ class ProductController extends Controller
      */
     private function getExchangeRate()
     {
-        try {
-            $curl = curl_init();
-
-            curl_setopt_array($curl, [
-                CURLOPT_URL => "https://open.er-api.com/v6/latest/USD",
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 5,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "GET",
-            ]);
-
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-
-            curl_close($curl);
-
-            if (!$err) {
-                $data = json_decode($response, true);
-                if (isset($data['rates']['EUR'])) {
-                    return $data['rates']['EUR'];
+        return Cache::remember('exchange_rate', now()->addMinutes(60), function () {
+            try {
+                $response = Http::timeout(5)->throw()->get('https://open.er-api.com/v6/latest/USD')->json();
+                if (isset($response['rates']['EUR'])) {
+                    return $response['rates']['EUR'];
                 }
+            } catch (Exception $e) {
+                Log::error('Call to exchange rate API failed with message: ' . $e->getMessage());
             }
-        } catch (\Exception $e) {
 
-        }
-
-        return env('EXCHANGE_RATE', 0.85);
+            return config('app.exchange_rate');
+        });
     }
+
 }

@@ -123,4 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'exchange_rate' => env('EXCHANGE_RATE', 0.85),
 ];

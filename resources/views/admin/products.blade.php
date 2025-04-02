@@ -44,7 +44,7 @@
         <div class="admin-header">
             <h1>Admin - Products</h1>
             <div>
-                <a href="{{ route('admin.add.product') }}" class="btn btn-primary">Add New Product</a>
+                <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add New Product</a>
                 <a href="{{ route('logout') }}" class="btn btn-secondary">Logout</a>
             </div>
         </div>
@@ -67,20 +67,26 @@
             </thead>
             <tbody>
                 @foreach($products as $product)
-                <tr>
-                    <td>{{ $product->id }}</td>
-                    <td>
-                        @if($product->image)
-                            <img src="{{ env('APP_URL') }}/{{ $product->image }}" width="50" height="50" alt="{{ $product->name }}">
-                        @endif
-                    </td>
-                    <td>{{ $product->name }}</td>
-                    <td>${{ number_format($product->price, 2) }}</td>
-                    <td>
-                        <a href="{{ route('admin.edit.product', $product->id) }}" class="btn btn-primary">Edit</a>
-                        <a href="{{ route('admin.delete.product', $product->id) }}" class="btn btn-secondary" onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>{{ $product->id }}</td>
+                        <td>
+                            @if($product->image)
+                                <img src="{{ asset($product->image) }}" width="50" height="50" alt="{{ $product->name }}">
+                            @endif
+                        </td>
+                        <td>{{ $product->name }}</td>
+                        <td>${{ number_format($product->price, 2) }}</td>
+                        <td>
+                            <div style="display: flex;align-content: center;gap: 4px">
+                                <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-primary">Edit</a>
+                                <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this product?');" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-secondary" style="height: 42px;font-size: 16px">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>

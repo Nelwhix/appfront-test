@@ -112,9 +112,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         // Insert products into the database
-        foreach ($products as $productData) {
-            Product::create($productData);
-        }
+        Product::query()->insert($products);
 
         $this->command->info('10 sample products seeded successfully!');
     }

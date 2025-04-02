@@ -113,4 +113,5 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    'price_notification_email' => env('PRICE_NOTIFICATION_EMAIL', 'admin@example.com'),
 ];

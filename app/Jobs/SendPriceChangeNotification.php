@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
@@ -16,37 +18,30 @@ class SendPriceChangeNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    protected $product;
-    protected $oldPrice;
-    protected $newPrice;
-    protected $email;
-
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($product, $oldPrice, $newPrice, $email)
-    {
-        $this->product = $product;
-        $this->oldPrice = $oldPrice;
-        $this->newPrice = $newPrice;
-        $this->email = $email;
-    }
+    public function __construct(
+        protected Product $product,
+        protected float $oldPrice,
+        protected float $newPrice,
+        protected string $email
+    ) {}
 
     /**
      * Execute the job.
      *
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
-            Mail::to($this->email)
-                ->send(new PriceChangeNotification(
-                    $this->product,
-                    $this->oldPrice,
-                    $this->newPrice
-                ));
-
+        Mail::to($this->email)
+            ->send(new PriceChangeNotification(
+                $this->product,
+                $this->oldPrice,
+                $this->newPrice
+            ));
     }
 }
